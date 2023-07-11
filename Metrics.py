@@ -1,9 +1,11 @@
 from pydriller import Repository
 import pandas as pd
-
+from datetime import datetime
+start_date = datetime(2023, 7, 10)  # Replace with your start date
+end_date = datetime(2023, 7, 11)
 # Replace this path with your own repository of interest
-path = 'https://github.com/mohamedazizkallel/Metric-Collection.git'
-repo = Repository(path)
+path = 'https://github.com/mohamedazizkallel/ArtGallery.git'
+repo = Repository(path, since=start_date, to=end_date)
 commits = []
 
 for commit in repo.traverse_commits():
