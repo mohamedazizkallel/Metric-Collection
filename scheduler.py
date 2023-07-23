@@ -6,6 +6,9 @@ import traceback
 import schedule
 import time
 
+# Replace "main" with the desired branch names in a list
+branch_names = ["main", "development", "feature-branch"]
+
 
 def process_repositories():
     end_date = datetime.now()
@@ -16,8 +19,6 @@ def process_repositories():
              'https://github.com/mohamedazizkallel/ArtGallery.git',
              'https://github.com/KrSkander/Pixxeling-Mobile.git']
 
-    branch_name = "main"  # Replace with the desired branch name
-
     commits = []
 
     for path in paths:
@@ -26,8 +27,8 @@ def process_repositories():
             repo = Repository(path)
 
             for commit in repo.traverse_commits():
-                # Check if the commit is in the desired branch
-                if branch_name in commit.branches:
+                # Check if the commit is in any of the desired branches
+                if any(branch_name in commit.branches for branch_name in branch_names):
                     hash = commit.hash
                     for f in commit.modified_files:
                         record = {
