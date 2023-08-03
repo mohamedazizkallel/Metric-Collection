@@ -6,25 +6,13 @@ import traceback
 import schedule
 import time
 
-# Replace "main" with the desired branch names in a list
-branch_names = ["main", "development", "feature-branch"]
-
-
-def process_repositories():
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=10) - relativedelta(years=0)
-
-    # Replace this path with your own repository of interest
-    paths = ['https://github.com/mohamedazizkallel/Metric-Collection.git',
-             'https://github.com/mohamedazizkallel/ArtGallery.git',
-             'https://github.com/KrSkander/Pixxeling-Mobile.git']
-
+def extract_commits(branch_names, paths, start_date, end_date):
     commits = []
 
     for path in paths:
         try:
             # Clone the repository to a temporary directory
-            repo = Repository(path)
+            repo = Repository(path, since=start_date, to=end_date)
 
             for commit in repo.traverse_commits():
                 # Check if the commit is in any of the desired branches
@@ -67,10 +55,44 @@ def process_repositories():
     df_file_commits = pd.DataFrame(commits)
     df_file_commits.to_csv('FileCommits.csv')
 
+def run_script(branch_names, paths, start_date, end_date):
+    print("Running data extraction for branches:", branch_names, "and paths:", paths)
+    extract_commits(branch_names, paths, start_date, end_date)
+    print("Data extraction completed!")
 
-# Schedule the script to run every Monday at a specific time (e.g., 3:00 AM)
-schedule.every().monday.at("03:00").do(process_repositories)
+def get_user_input():
+    branch_names_str = input("Enter desired branch names (separated by space): ")
+    branch_names = branch_names_str.split()
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+    paths_str = input("Enter repository URLs (separated by space): ")
+    paths = paths_str.split()
+
+    end_date_str = input("Enter the end date in YYYY-MM-DD format: ")
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    days_str = input("Enter the number of days for the start date: ")
+    years_str = input("Enter the number of years for the start date: ")
+
+    days = int(days_str)
+    years = int(years_str)
+
+    start_date = end_date - timedelta(days=days) - relativedelta(years=years)
+
+    return branch_names, paths, start_date, end_date
+
+def main():
+    # Get user inputs
+    branch_names, paths, start_date, end_date = get_user_input()
+
+    # Run the script immediately
+    run_script(branch_names, paths, start_date, end_date)
+
+    # Schedule the script to run every Monday at 3:00 AM
+    schedule.every().monday.at("03:00").do(run_script, branch_names, paths, start_date, end_date)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()

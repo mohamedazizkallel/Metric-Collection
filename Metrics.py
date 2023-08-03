@@ -4,23 +4,33 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import traceback
 
-end_date = datetime.now()
-start_date = end_date - timedelta(days=10) - relativedelta(years=0)
+# Get user inputs for branch names and paths
+branch_names_str = input("Enter desired branch names (separated by space): ")
+branch_names = branch_names_str.split()
 
-# Replace this path with your own repository of interest
-paths = ['https://github.com/mohamedazizkallel/Metric-Collection.git',
-         'https://github.com/mohamedazizkallel/ArtGallery.git',
-         'https://github.com/KrSkander/Pixxeling-Mobile.git']
+paths_str = input("Enter repository URLs (separated by space): ")
+paths = paths_str.split()
 
-# Replace "main" with the desired branch names in a list
-branch_names = ["main", "Main"]
+# Get user input for end_date
+end_date_str = input("Enter the end date in YYYY-MM-DD format: ")
+end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+# Get user input for days and years
+days_str = input("Enter the number of days for the start date: ")
+years_str = input("Enter the number of years for the start date: ")
+
+days = int(days_str)
+years = int(years_str)
+
+# Calculate start_date using timedelta and relativedelta
+start_date = end_date - timedelta(days=days) - relativedelta(years=years)
 
 commits = []
 
 for path in paths:
     try:
         # Clone the repository to a temporary directory
-        repo = Repository(path)
+        repo = Repository(path, since=start_date, to=end_date)
 
         for commit in repo.traverse_commits():
             # Check if the commit is in any of the desired branches
